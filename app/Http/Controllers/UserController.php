@@ -15,7 +15,7 @@ class UserController extends Controller
         //   order by created_at desc
         //   limit 3
 
-        $users = User::all(); // replace this with Eloquent statement
+        $users = User::whereNotNull('email_verified_at')->orderBy('created_at', 'DESC')->limit(5)->get(); // replace this with Eloquent statement
 
         return view('users.index', compact('users'));
     }
@@ -31,7 +31,19 @@ class UserController extends Controller
     {
         // TASK: find a user by $name and $email
         //   if not found, create a user with $name, $email and random password
-        $user = NULL;
+        $user = User::where([
+            ['name', '=', $name],
+            ['email', '=', $email]
+        ])->get();
+
+        if (!$user)
+        {
+            $user = new User();
+            $user->name = $name;
+            $user->email = $email;
+            $user->password = Hash::make('asdasd');
+            $user->save();
+        }
 
         return view('users.show', compact('user'));
     }
@@ -40,7 +52,21 @@ class UserController extends Controller
     {
         // TASK: find a user by $name and update it with $email
         //   if not found, create a user with $name, $email and random password
-        $user = NULL; // updated or created user
+        $user = User::where([
+            ['name', '=', $name],
+        ])->get();
+
+        if (!$user)
+        {
+            $user = new User();
+            $user->name = $name;
+            $user->email = $email;
+            $user->password = Hash::make('asdasd');
+        } else {
+            $user->email = $email;
+        }
+
+        $user->save();
 
         return view('users.show', compact('user'));
     }
